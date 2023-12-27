@@ -1,6 +1,4 @@
-### 23/12/26
-
-# Next.js - 생활코딩 정리
+# Next.js - 생활코딩 & 공식문서 정리
 
 • `npx` : npm 패키지를 간편하게 실행할 수 있도록 도와주는 도구
 
@@ -208,3 +206,161 @@ const topics = await res.json();
 
 1.  **metadata**는 server component이다.
 2.  `use client` 문을 최상단에 사용하면 client component가 된다.
+3.  데이터를 읽고 출력만 한다. (사용자와 상호작용이 없다.) - `서버컴포넌트`로 구현
+
+<br>
+
+### 클라이언트 컴포넌트
+
+```tsx
+export default function Create() {
+  return (
+    <form onSubmit={() => {}}>
+      <p>
+        <input type="text" name="title" placeholder="title" />
+      </p>
+      <p>
+        <textarea name="body" placeholder="body"></textarea>
+      </p>
+      <p>
+        <input type="submit" value="create" />
+      </p>
+    </form>
+  );
+}
+```
+
+⇒ 사용자와 상호작용 하는 페이지
+
+⇒ **에러발생!!**
+
+따라서 `use client` 를 최상단에 추가
+
+<br>
+
+### useRouter
+
+```tsx
+"use client";
+
+import { useRouter } from "next/navigation";
+
+export default function Create() {
+  const router = useRouter();
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const title = e.target.title.value;
+        const body = e.target.body.value;
+        const option = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ title, body }),
+        };
+        const res = fetch("http://localhost:9999/topics", option)
+          .then((res) => res.json())
+          .then((res) => {
+            console.log(res);
+            const lastid = res.id;
+            router.push(`/read/${lastid}`); // 요렇게 사용
+          });
+      }}
+    >
+      <p>
+        <input type="text" name="title" placeholder="title" />
+      </p>
+      <p>
+        <textarea name="body" placeholder="body"></textarea>
+      </p>
+      <p>
+        <input type="submit" value="create" />
+      </p>
+    </form>
+  );
+}
+```
+
+<br>
+
+### cache
+
+- \***\*[Revalidating Data](https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating#revalidating-data)\*\***
+
+1. `**revalidate**`
+
+```tsx
+// 3600초동안 캐시를 유지하고 그후 다시 생성된다.
+fetch("https://...", { next: { revalidate: 3600 } });
+```
+
+2.  `no-store` 속성
+
+```tsx
+fetch("https://...", { cache: "no-store" });
+```
+
+⇒ 처음에는 cache정책을 끄고 개발하다가 , 숙지 후 cache 를 최대한으로 활용하기
+
+<br>
+
+### 공식문서
+
+1. **Caching Data**
+
+- 데이터 캐싱이란 ?
+
+  데이터를 매번 요청할 때마다 데이터 소스에서 다시 가져오지 않도록 데이터를 저장하는 기술
+
+- Next.js에서 서버의 데이터 캐시에 **fetch의 반환값**들을 자동으로 캐시한다.
+  - `force-cache` 는 기본값이며 생량가능.
+  ```tsx
+  fetch("https://...", { cache: "force-cache" });
+  ```
+  - post fetch 요청도 자동으로 캐싱되지만 Router handeler 내부에 있지 않는 경우만 캐시된다.
+-
+
+1. **Revalidating Data**
+
+- Revalidating data란?
+
+  데이커 캐시를 삭제하고 최신 데이터를 다시 가져오는 프로세스
+
+- 재검증 두가지 방법
+
+  1. 시간기반 재검증 \*\*\*\*
+     - 일정시간 경과 후 자동으로 데이터를 재검증한다 ⇒ 변경빈도가 낮은데이터에 유용!
+
+  ```tsx
+  fetch("https://...", { next: { revalidate: 3600 } });
+  ```
+
+  1. 요청기반 재검증
+
+     - 이벤트에 기반하여 데이터를 수동으로 재검증 ⇒ 최신 데이터를 가능한 빨리 표시하고자할때 유용 !
+     - `revalidateTag` : 캐시된 데이터를 태그를 기반으로 다시 검증(revalidate)하는 메서드
+
+     ```tsx
+     // app/page.tsx
+     export default async function Page() {
+       const res = await fetch("https://...", {
+         next: { tags: ["collection"] },
+       });
+       const data = await res.json();
+       // ...
+     }
+     ```
+
+     ```tsx
+     // app/actions.ts
+     import { revalidateTag } from "next/cache";
+
+     export default async function action() {
+       revalidateTag("collection");
+     }
+     ```
+
+     - Server Action이나 Route Handler 내에서 **`revalidateTag`**를 호출하여 'collection' 태그와 관련된 모든 데이터를 재검증할 수 있다.
+     - `revalidateTag('collection')`를 호출하면 'collection' 태그와 관련된 모든 캐시 항목이 무효화되고, 그 후 다음 요청에서는 해당 데이터를 새로 가져오게 된다.

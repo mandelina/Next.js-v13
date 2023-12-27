@@ -11,22 +11,22 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const res = await fetch("http://localhost:9999/topics");
+  const res = await fetch("http://localhost:9999/topics", {
+    next: { revalidate: 0 },
+  });
   const topics = await res.json();
   return (
     <html>
       {/* page.tsx가 return한 값을 children 자리에 가져다둠  */}
       <body>
-        <h1>
-          <Link href="">WEB</Link>
-        </h1>
         <ol>
-          <li>
-            <Link href="/read/1">html</Link>
-          </li>
-          <li>
-            <Link href="/read/2">css</Link>
-          </li>
+          {topics.map((topic) => {
+            return (
+              <li key={topic.id}>
+                <Link href={`read/${topic.id}`}>{topic.title}</Link>
+              </li>
+            );
+          })}
         </ol>
         {children}
         <ul>
