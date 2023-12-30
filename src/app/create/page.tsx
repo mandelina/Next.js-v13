@@ -1,6 +1,5 @@
-"use client";
-
-import { useRouter } from "next/navigation";
+'use client';
+import { useRouter } from 'next/navigation';
 
 export default function Create() {
   const router = useRouter();
@@ -11,13 +10,13 @@ export default function Create() {
         const title = e.target.title.value;
         const body = e.target.body.value;
         const option = {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({ title, body }),
         };
-        const res = fetch("http://localhost:9999/topics", option)
+        const res = fetch('http://localhost:9999/topics', option)
           .then((res) => res.json())
           .then((res) => {
             console.log(res);

@@ -2,8 +2,8 @@
   "topics": [
     {
       "id": 1,
-      "title": "html",
-      "body": "html임둥"
+      "title": "html 수정",
+      "body": "html수정"
     },
     {
       "id": 2,
@@ -16,19 +16,9 @@
       "id": 3
     },
     {
-      "title": "react",
-      "body": "react is.....",
-      "id": 4
-    },
-    {
-      "title": "react",
-      "body": "react는 짱조아",
-      "id": 5
-    },
-    {
-      "title": "ㅠ",
-      "body": "ㅠ",
-      "id": 6
+      "title": "",
+      "body": "",
+      "id": 8
     }
   ],
   "posts": [

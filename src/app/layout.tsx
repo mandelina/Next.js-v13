@@ -1,17 +1,17 @@
-import "./globals.css";
-import Link from "../../node_modules/next/link";
+import './globals.css';
+import Link from '../../node_modules/next/link';
+import { Control } from './Control';
 
 export const metadata = {
-  title: "devdevdev",
-  description: "꿈빛 파티시엘 project",
+  title: 'devdevdev',
+  description: '꿈빛 파티시엘 project',
 };
-
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const res = await fetch("http://localhost:9999/topics", {
+  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/topics', {
     next: { revalidate: 0 },
   });
   const topics = await res.json();
@@ -23,23 +23,15 @@ export default async function RootLayout({
           {topics.map((topic) => {
             return (
               <li key={topic.id}>
-                <Link href={`read/${topic.id}`}>{topic.title}</Link>
+                <Link href={`read/[id]`} as={`/read/${topic.id}`}>
+                  {topic.title}
+                </Link>
               </li>
             );
           })}
         </ol>
         {children}
-        <ul>
-          <li>
-            <Link href="/create"> Create</Link>
-          </li>
-          <li>
-            <Link href="/update/1">update</Link>
-          </li>
-          <li>
-            <input type="button" value="delete" />
-          </li>
-        </ul>
+        <Control />
       </body>
     </html>
   );
