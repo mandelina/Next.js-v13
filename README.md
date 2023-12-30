@@ -3,7 +3,7 @@
 • `npx` : npm 패키지를 간편하게 실행할 수 있도록 도와주는 도구
 
 ```jsx
-import "./globals.css";
+import './globals.css';
 
 export default function RootLayout({
   children,
@@ -32,8 +32,8 @@ export default function RootLayout({
 
 ```jsx
 export const metadata = {
-  title: "devdevdev",
-  description: "꿈빛 파티시엘 project", // html 확인
+  title: 'devdevdev',
+  description: '꿈빛 파티시엘 project', // html 확인
 };
 ```
 
@@ -90,7 +90,7 @@ export default function Read(props) {
 - 이를 해결하기 위해 `<a>` 대신 `<Link>` 를 사용하자!
 
 ```jsx
-import Link from "/next/link";
+import Link from '/next/link';
 ```
 
 - 이렇게 하면 처음 방문한 페이지는 서버와 통신자체를 하지않음!!
@@ -192,7 +192,7 @@ export default function RootLayout({
 **⇒ 서버 컴포넌트에서 useEffect,useState 같은 클라이언트 컴포넌트쪽 api를 사용하여서 에러가 난다!**
 
 ```tsx
-const res = await fetch("http://localhost:9999/topics");
+const res = await fetch('http://localhost:9999/topics');
 const topics = await res.json();
 ```
 
@@ -241,9 +241,9 @@ export default function Create() {
 ### useRouter
 
 ```tsx
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
+import { useRouter } from 'next/navigation';
 
 export default function Create() {
   const router = useRouter();
@@ -254,13 +254,13 @@ export default function Create() {
         const title = e.target.title.value;
         const body = e.target.body.value;
         const option = {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({ title, body }),
         };
-        const res = fetch("http://localhost:9999/topics", option)
+        const res = fetch('http://localhost:9999/topics', option)
           .then((res) => res.json())
           .then((res) => {
             console.log(res);
@@ -293,13 +293,13 @@ export default function Create() {
 
 ```tsx
 // 3600초동안 캐시를 유지하고 그후 다시 생성된다.
-fetch("https://...", { next: { revalidate: 3600 } });
+fetch('https://...', { next: { revalidate: 3600 } });
 ```
 
 2.  `no-store` 속성
 
 ```tsx
-fetch("https://...", { cache: "no-store" });
+fetch('https://...', { cache: 'no-store' });
 ```
 
 ⇒ 처음에는 cache정책을 끄고 개발하다가 , 숙지 후 cache 를 최대한으로 활용하기
@@ -317,7 +317,7 @@ fetch("https://...", { cache: "no-store" });
 - Next.js에서 서버의 데이터 캐시에 **fetch의 반환값**들을 자동으로 캐시한다.
   - `force-cache` 는 기본값이며 생량가능.
   ```tsx
-  fetch("https://...", { cache: "force-cache" });
+  fetch('https://...', { cache: 'force-cache' });
   ```
   - post fetch 요청도 자동으로 캐싱되지만 Router handeler 내부에 있지 않는 경우만 캐시된다.
 -
@@ -334,7 +334,7 @@ fetch("https://...", { cache: "no-store" });
      - 일정시간 경과 후 자동으로 데이터를 재검증한다 ⇒ 변경빈도가 낮은데이터에 유용!
 
   ```tsx
-  fetch("https://...", { next: { revalidate: 3600 } });
+  fetch('https://...', { next: { revalidate: 3600 } });
   ```
 
   1. 요청기반 재검증
@@ -345,8 +345,8 @@ fetch("https://...", { cache: "no-store" });
      ```tsx
      // app/page.tsx
      export default async function Page() {
-       const res = await fetch("https://...", {
-         next: { tags: ["collection"] },
+       const res = await fetch('https://...', {
+         next: { tags: ['collection'] },
        });
        const data = await res.json();
        // ...
@@ -355,12 +355,83 @@ fetch("https://...", { cache: "no-store" });
 
      ```tsx
      // app/actions.ts
-     import { revalidateTag } from "next/cache";
+     import { revalidateTag } from 'next/cache';
 
      export default async function action() {
-       revalidateTag("collection");
+       revalidateTag('collection');
      }
      ```
 
      - Server Action이나 Route Handler 내에서 **`revalidateTag`**를 호출하여 'collection' 태그와 관련된 모든 데이터를 재검증할 수 있다.
      - `revalidateTag('collection')`를 호출하면 'collection' 태그와 관련된 모든 캐시 항목이 무효화되고, 그 후 다음 요청에서는 해당 데이터를 새로 가져오게 된다.
+
+<br>
+
+1. 요청기반 재검증
+
+   - 이벤트에 기반하여 데이터를 수동으로 재검증 ⇒ 최신 데이터를 가능한 빨리 표시하고자할때 유용 !
+   - `revalidateTag` : 캐시된 데이터를 태그를 기반으로 다시 검증(revalidate)하는 메서드
+
+   ```tsx
+   // app/page.tsx
+   export default async function Page() {
+     const res = await fetch('https://...', { next: { tags: ['collection'] } });
+     const data = await res.json();
+     // ...
+   }
+   ```
+
+   ```tsx
+   // app/actions.ts
+   import { revalidateTag } from 'next/cache';
+
+   export default async function action() {
+     revalidateTag('collection');
+   }
+   ```
+
+   - Server Action이나 Route Handler 내에서 **`revalidateTag`**를 호출하여 'collection' 태그와 관련된 모든 데이터를 재검증할 수 있다.
+   - `revalidateTag('collection')`를 호출하면 'collection' 태그와 관련된 모든 캐시 항목이 무효화되고, 그 후 다음 요청에서는 해당 데이터를 새로 가져오게 된다.
+
+   ### useParams
+
+   - 클라이언트 컴포넌트 hook
+   - `layout.js` (서버컴포넌트)에서 useParams를 사용하려면
+     - 컴포넌트 분리!
+   - 파라미터값을 읽어올 수 있다.
+
+   ```tsx
+   const prams = useParams();
+   const id = prams.id;
+   ```
+
+   ### error : 라우팅시 url이 중첩되는 현상
+
+   문제 : 글목록을 클릭할때마다 `read/read/1` 이런식으로 중첩되어 url이 잡힘
+
+   해결
+
+   ```tsx
+   <Link href={`read/[id]`} as={`/read/${topic.id}`}>
+   ```
+
+   - as를 사용해서 해결.
+
+### 환경변수
+
+`.env.local` : 애플리케이션 정보들
+
+- 보안성 때문에 `layout.js` 와 같은 서버 컴포넌트에서만 접근이 가능하다!
+
+```tsx
+DB_HOST = localhost;
+DB_USER = myuser;
+DB_PASS = mypassword;
+```
+
+- 하지만 기밀한 정보말고 API_URL같이 클라이언트 컴포넌트에서 접근할 수 있게 하려면?
+- `NEXT_PUBLIC_` 를 prefix로 붙여서 사용!!
+
+```tsx
+NEXT_PUBLIC_API_URL=http://localhost:9999
+```
